@@ -1,9 +1,11 @@
 import express from 'express';
+import cors from 'cors';
 import { SAPService } from './services/sap-service.js';
 import { SAPMCPServer } from './server/mcp-server.js';
 import { SSEServerTransport } from '@modelcontextprotocol/sdk/server/sse.js';
 
 const app = express();
+app.use(cors()); 
 
 // Vercel par incoming JSON messages parse karne ke liye
 app.use(express.json()); 
