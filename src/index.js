@@ -33,13 +33,13 @@ async function initializeServer() {
   return mcpServer.getServer();
 }
 
-// 🔗 1. SSE Connection Endpoint (Claude Web UI yahan connect karega)
+// 🔗 1. SSE Connection Endpoint (GET)
 app.get('/sse', async (req, res) => {
   try {
     const server = await initializeServer();
     
-    // Web ke liye SSE Transport use karte hain, Stdio nahi
-    transport = new SSEServerTransport('/messages', res);
+    // Yahan endpoint /sse hi pass kar dete hain taaki Claude khush rahe
+    transport = new SSEServerTransport('/sse', res);
     await server.connect(transport);
     
     console.log('✅ Claude Web Client connected via SSE');
@@ -49,7 +49,20 @@ app.get('/sse', async (req, res) => {
   }
 });
 
-// 📩 2. Messages Endpoint (Claude prompts yahan bhejega)
+// 📩 2. Messages Endpoint (Claude POST /sse yahin bhejta hai)
+app.post('/sse', async (req, res) => {
+  try {
+    if (!transport) {
+      return res.status(400).send('No active SSE connection found.');
+    }
+    await transport.handlePostMessage(req, res);
+  } catch (error) {
+    console.error('❌ Message Handling Error:', error.message);
+    res.status(500).send('Error processing message');
+  }
+});
+
+// Purana /messages bhi rakha rehne dein agar zaroorat pade toh
 app.post('/messages', async (req, res) => {
   try {
     if (!transport) {
@@ -61,6 +74,7 @@ app.post('/messages', async (req, res) => {
     res.status(500).send('Error processing message');
   }
 });
+
 
 // 🏥 3. Basic Health Check URL (Browser mein check karne ke liye)
 app.get('/', (req, res) => {
