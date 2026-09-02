@@ -75,6 +75,43 @@ app.post('/sse', async (req, res) => {
   }
 });
 
+// ==========================================
+// 🔐 MOCK OAUTH 2.0 ENDPOINTS (Claude Validator ke liye)
+// ==========================================
+
+// 1. OAuth Discovery Metadata
+app.get('/.well-known/oauth-authorization-server', (req, res) => {
+  const baseUrl = `${req.protocol}://${req.get('host')}`;
+  res.json({
+    issuer: baseUrl,
+    authorization_endpoint: `${baseUrl}/oauth/authorize`,
+    token_endpoint: `${baseUrl}/oauth/token`,
+    response_types_supported: ["code"],
+    grant_types_supported: ["authorization_code", "refresh_token"],
+    code_challenge_methods_supported: ["S256", "plain"]
+  });
+});
+
+// 2. OAuth Authorize Endpoint (Automatic approve karke redirect kar dega)
+app.get('/oauth/authorize', (req, res) => {
+  const { redirect_uri, state } = req.query;
+  console.log('[OAuth] Authorize hit, redirecting back with code...');
+  if (redirect_uri) {
+    return res.redirect(`${redirect_uri}?code=mock_auth_code_sap_123&state=${state || ''}`);
+  }
+  res.status(400).send('Missing redirect_uri');
+});
+
+// 3. OAuth Token Endpoint (Dummy Access Token dega)
+app.post('/oauth/token', express.urlencoded({ extended: true }), (req, res) => {
+  console.log('[OAuth] Token exchange requested');
+  res.json({
+    access_token: "mock_sap_bearer_token_xyz999",
+    token_type: "Bearer",
+    expires_in: 86400
+  });
+});
+
 // Fallback /messages route
 app.post('/messages', async (req, res) => {
   const sessionId = req.query.sessionId;
