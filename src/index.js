@@ -59,9 +59,9 @@ app.post('/sse', async (req, res) => {
   const transport = transports[sessionId];
 
   if (!transport) {
-    // Agar validator bina session ke hit kare toh graceful response dein
     if (!sessionId) {
-      return res.status(200).json({ status: 'ready', message: 'SSE endpoint active' });
+      // JSON ki jagah sirf plain text 'OK' return karein taaki validator confuse na ho
+      return res.status(200).send('OK');
     }
     return res.status(400).send('No active SSE connection found for this session.');
   }
