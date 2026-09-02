@@ -11,7 +11,7 @@ app.use((req, res, next) => {
   next();
 });
 // Vercel par incoming JSON messages parse karne ke liye
-app.use(express.json()); 
+// app.use(express.json()); 
 
 let sapService;
 let mcpServer;
