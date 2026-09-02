@@ -56,28 +56,6 @@ app.get('/sse', async (req, res) => {
   }
 });
 
-// 📩 2. Messages Endpoint (POST /sse with sessionId)
-// 📩 2. Messages Endpoint (POST /sse)
-app.post('/sse', async (req, res) => {
-  const sessionId = req.query.sessionId;
-  const transport = transports[sessionId];
-
-  if (!transport) {
-    // Agar validator bina session ke probe kare, toh simple plain text 'OK' bhej dein
-    if (!sessionId) {
-      return res.status(200).send('OK');
-    }
-    return res.status(400).send('No active SSE connection found for this session.');
-  }
-
-  try {
-    await transport.handlePostMessage(req, res);
-  } catch (error) {
-    console.error('❌ Message Handling Error:', error.message);
-    res.status(500).send('Error processing message');
-  }
-});
-
 // ==========================================
 // 🔐 MOCK OAUTH 2.0 ENDPOINTS (Claude Validator ke liye)
 // ==========================================
@@ -115,13 +93,14 @@ app.post('/oauth/token', express.urlencoded({ extended: true }), (req, res) => {
   });
 });
 
-// Fallback /messages route
-app.post('/messages', async (req, res) => {
+// 📩 2. Messages Endpoint (/sse)
+app.post('/sse', async (req, res) => {
   const sessionId = req.query.sessionId;
   const transport = transports[sessionId];
 
   if (!transport) {
-    return res.status(400).send('No active SSE connection found.');
+    // 🛠️ HACK REMOVED: Ab hum seedha 404 denge taaki Claude Streamable HTTP assume na kare
+    return res.status(404).json({ error: "Session not found. Use GET /sse to initialize." });
   }
 
   try {
@@ -132,6 +111,22 @@ app.post('/messages', async (req, res) => {
   }
 });
 
+// 📩 3. Messages Endpoint (/messages)
+app.post('/messages', async (req, res) => {
+  const sessionId = req.query.sessionId;
+  const transport = transports[sessionId];
+
+  if (!transport) {
+    return res.status(404).json({ error: "Session not found." });
+  }
+
+  try {
+    await transport.handlePostMessage(req, res);
+  } catch (error) {
+    console.error('❌ Message Handling Error:', error.message);
+    res.status(500).send('Error processing message');
+  }
+});
 // 🏥 Health Check & Redirects
 app.get('/', (req, res) => {
   res.status(200).send('SAP MCP Server is active and ready! 🚀');
