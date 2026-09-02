@@ -31,12 +31,13 @@ async function initializeServer() {
 
 // 🔗 1. SSE Connection Endpoint (GET)
 // 🔗 1. SSE Connection Endpoint (GET)
+// 🔗 1. SSE Connection Endpoint (GET)
 app.get('/sse', async (req, res) => {
   try {
     const server = await initializeServer();
     
-    // 🛠️ FIX: Relative path ki jagah poora Absolute URL generate karke paas karein
-    const messagesUrl = `${req.protocol}://${req.get('host')}/messages`;
+    // 🛠️ FIX: Relative path ya proxy issue se bachne ke liye poora HTTPS URL explicitly de rahe hain
+    const messagesUrl = 'https://sap-live-agent.onrender.com/messages';
     const transport = new SSEServerTransport(messagesUrl, res);
     
     // Session ID ke basis par store karein
