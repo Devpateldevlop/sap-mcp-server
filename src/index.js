@@ -54,14 +54,18 @@ app.get('/sse', async (req, res) => {
 });
 
 // 📩 2. Messages Endpoint (POST /sse with sessionId)
+// 📩 2. Messages Endpoint (POST /sse)
 app.post('/sse', async (req, res) => {
   const sessionId = req.query.sessionId;
   const transport = transports[sessionId];
 
   if (!transport) {
+    // Agar Claude ka validator bina session ke probe kare, toh use SSE headers ke sath OK bhej dein
     if (!sessionId) {
-      // JSON ki jagah sirf plain text 'OK' return karein taaki validator confuse na ho
-      return res.status(200).send('OK');
+      res.setHeader('Content-Type', 'text/event-stream');
+      res.setHeader('Cache-Control', 'no-cache');
+      res.setHeader('Connection', 'keep-alive');
+      return res.status(200).write(': ping\n\n');
     }
     return res.status(400).send('No active SSE connection found for this session.');
   }
