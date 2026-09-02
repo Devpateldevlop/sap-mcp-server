@@ -65,4 +65,8 @@ app.get('/', (req, res) => {
 });
 
 // Vercel ko HTTP server export karke dena padta hai
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`🚀 SAP Live Agent is running on port ${PORT}`);
+});
 export default app;
