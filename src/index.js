@@ -6,7 +6,10 @@ import { SSEServerTransport } from '@modelcontextprotocol/sdk/server/sse.js';
 
 const app = express();
 app.use(cors()); 
-
+app.use((req, res, next) => {
+  console.log(`[DEBUG] Claude is trying to hit: ${req.method} ${req.url}`);
+  next();
+});
 // Vercel par incoming JSON messages parse karne ke liye
 app.use(express.json()); 
 
