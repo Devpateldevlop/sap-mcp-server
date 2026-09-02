@@ -66,6 +66,9 @@ app.post('/messages', async (req, res) => {
 app.get('/', (req, res) => {
   res.send('SAP MCP Server is LIVE on Vercel! 🚀');
 });
+app.get('/mcp', (req, res) => {
+  res.redirect('/sse');
+});
 
 // Vercel ko HTTP server export karke dena padta hai
 const PORT = process.env.PORT || 3000;
