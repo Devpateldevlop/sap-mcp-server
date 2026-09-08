@@ -32,15 +32,14 @@ async function initializeServer() {
 // 🔗 1. SSE Connection Endpoint (GET)
 // 🔗 1. SSE Connection Endpoint (GET)
 // 🔗 1. SSE Connection Endpoint (GET)
-app.get('/sse', async (req, res) => {
+app.get('/mcp', async (req, res) => {
   try {
     const server = await initializeServer();
     
-    // 🛠️ FIX: Relative path ya proxy issue se bachne ke liye poora HTTPS URL explicitly de rahe hain
+    // Yahan aap messages endpoint ka URL wahi rakh sakte hain ya /messages hi rehne dein
     const messagesUrl = 'https://sap-live-agent.onrender.com/messages';
     const transport = new SSEServerTransport(messagesUrl, res);
     
-    // Session ID ke basis par store karein
     transports[transport.sessionId] = transport;
 
     transport.onclose = () => {
@@ -49,9 +48,9 @@ app.get('/sse', async (req, res) => {
     };
 
     await server.connect(transport);
-    console.log(`✅ Claude Web Client connected via SSE (Session: ${transport.sessionId})`);
+    console.log(`✅ Claude Web Client connected via MCP route (Session: ${transport.sessionId})`);
   } catch (error) {
-    console.error('❌ SSE Connection Error:', error.message);
+    console.error('❌ MCP Connection Error:', error.message);
     res.status(500).send('Internal Server Error');
   }
 });
