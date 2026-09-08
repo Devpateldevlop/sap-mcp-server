@@ -32,11 +32,16 @@ async function initializeServer() {
 // 🔗 1. SSE Connection Endpoint (GET)
 // 🔗 1. SSE Connection Endpoint (GET)
 // 🔗 1. SSE Connection Endpoint (GET)
+// 🔗 1. MCP Connection Endpoint (GET)
 app.get('/mcp', async (req, res) => {
   try {
-    const server = await initializeServer();
+    console.log('🚀 Initializing fresh SAP MCP Server instance for session...');
     
-    // Yahan aap messages endpoint ka URL wahi rakh sakte hain ya /messages hi rehne dein
+    // 🛠️ FIX: Har connection ke liye naya sapService aur naya mcpServer banayein
+    const currentSapService = new SAPService();
+    const mcpInstance = new SAPMCPServer(currentSapService);
+    const server = mcpInstance.getServer();
+    
     const messagesUrl = 'https://sap-live-agent.onrender.com/messages';
     const transport = new SSEServerTransport(messagesUrl, res);
     
