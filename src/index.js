@@ -144,9 +144,9 @@ app.get('/', (req, res) => {
   res.status(200).send('SAP MCP Server is active and ready! 🚀');
 });
 
-app.get('/mcp', (req, res) => {
-  res.redirect('/sse');
-});
+// app.get('/mcp', (req, res) => {
+//   res.redirect('/sse');
+// });
 
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
