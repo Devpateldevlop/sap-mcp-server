@@ -98,7 +98,7 @@ app.post('/oauth/token', express.urlencoded({ extended: true }), (req, res) => {
 });
 
 // 📩 2. Messages Endpoint (/sse)
-app.post('/sse', async (req, res) => {
+app.post('/mcp', async (req, res) => {
   const sessionId = req.query.sessionId;
   const transport = transports[sessionId];
 
