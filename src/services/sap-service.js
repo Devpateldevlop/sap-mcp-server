@@ -97,4 +97,65 @@ export class SAPService {
       return { status: 'error', message: `SAP connection failed: ${error.message}` };
     }
   }
+
+  // 🔐 1. CSRF Token Fetcher (SAP Security Bypass)
+  async getCsrfToken() {
+    try {
+      console.log('🔐 Fetching CSRF Token from SAP...');
+      // Ek choti si GET request maar ke token fetch kar rahe hain
+      const response = await axios.get(`${this.baseUrl}/TableDataSet?$top=1`, {
+        auth: this.auth,
+        headers: {
+          'X-CSRF-Token': 'Fetch',
+          'Accept': 'application/json'
+        }
+      });
+
+      const csrfToken = response.headers['x-csrf-token'];
+      const cookies = response.headers['set-cookie'];
+      
+      console.log('✅ CSRF Token Fetched Successfully!');
+      return { csrfToken, cookies };
+    } catch (error) {
+      console.error('❌ Failed to fetch CSRF Token:', error.message);
+      throw error;
+    }
+  }
+
+  // 📝 2. Generic Create Document Logic (POST Request)
+  async createGenericDocument(docType, jsonData) {
+    try {
+      const { csrfToken, cookies } = await this.getCsrfToken();
+
+      console.log(`🚀 Sending POST request to SAP for creating ${docType}...`);
+      
+      // Payload structure (Waisa hi jaisa humne SEGW Entity mein banaya)
+      const payload = {
+        DocType: docType.toUpperCase(),
+        JsonData: JSON.stringify(jsonData), 
+        ReturnStatus: "",
+        ReturnMessage: ""
+      };
+
+      const response = await axios.post(`${this.baseUrl}/GenericCreateSet`, payload, {
+        auth: this.auth,
+        headers: {
+          'X-CSRF-Token': csrfToken,
+          'Cookie': cookies ? cookies.join('; ') : '',
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
+      });
+
+      return response.data.d;
+    } catch (error) {
+      console.error(`❌ Error creating ${docType} in SAP:`, error.message);
+      if (error.response && error.response.data && error.response.data.error) {
+         const sapError = error.response.data.error.message.value;
+         console.error('SAP Error Details:', sapError);
+         return { ReturnStatus: 'E', ReturnMessage: sapError };
+      }
+      throw error;
+    }
+  }
 }

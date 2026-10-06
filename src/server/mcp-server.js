@@ -23,6 +23,7 @@ export class SAPMCPServer {
     this.registerHealthTool();
     this.registerProductTools();
     this.registerDynamicSearchTool(); 
+    this.registerCreateTools();
   }
 
   registerHealthTool() {
@@ -113,6 +114,68 @@ export class SAPMCPServer {
       }
     );
   }
+
+  // ==========================================
+  // 🚀 NAYE CREATE TOOLS (BOSS-READY)
+  // ==========================================
+  registerCreateTools() {
+    // 🧠 TOOL 1: The Template Fetcher (Claude puchega details)
+    this.server.tool(
+      'sap_get_document_template',
+      {
+        docType: z.enum(['PO', 'SO', 'PR']).describe('The type of SAP document to create (e.g., PO for Purchase Order)'),
+      },
+      async ({ docType }) => {
+        const templates = {
+          'PO': ['vendor (Vendor Number, e.g., 1000)', 'material (Material Number, e.g., 40)', 'quantity (Numeric amount)', 'plant (Plant Code, e.g., 1000)'],
+          'SO': ['customer', 'material', 'quantity', 'salesOrg'],
+          'PR': ['material', 'quantity', 'plant']
+        };
+
+        const requiredFields = templates[docType] || [];
+        return {
+          content: [{ 
+            type: 'text', 
+            text: `To create a ${docType}, you MUST strictly ask the user to provide these exact fields: ${requiredFields.join(', ')}. Do not call the create tool until the user provides all of them.` 
+          }]
+        };
+      }
+    );
+
+    // 🚀 TOOL 2: The Document Creator (Actual BAPI Trigger)
+    this.server.tool(
+      'sap_create_document',
+      {
+        docType: z.string().describe('Document type like PO, SO, PR'),
+        jsonData: z.record(z.any()).describe('JSON object containing the exact details provided by the user'),
+      },
+      async ({ docType, jsonData }) => {
+        try {
+          console.log(`🤖 Claude is triggering BAPI for ${docType} with data:`, jsonData);
+          
+          // sap-service.js wala naya function call hoga
+          const result = await this.sapService.createGenericDocument(docType, jsonData);
+          
+          return {
+            content: [{ 
+              type: 'text', 
+              text: `SAP Execution Result -> Status: ${result.ReturnStatus}, Message: ${result.ReturnMessage}` 
+            }]
+          };
+        } catch (error) {
+          return {
+            content: [{ 
+              type: 'text', 
+              text: `Error triggering SAP creation: ${error.message}` 
+            }]
+          };
+        }
+      }
+    );
+  }
+
+
+  
 
   // 👇 Yahan se maine start() method aur StdioTransport hata diya hai
   // Kyunki ab server ko run karne ka kaam index.js aur Express handle kar rahe hain
