@@ -126,19 +126,19 @@ export class SAPMCPServer {
         docType: z.enum(['PO', 'SO', 'PR']).describe('The type of SAP document to create (e.g., PO for Purchase Order)'),
       },
       async ({ docType }) => {
-       const templates = {
-          // 🔥 Naya field add kiya: comp_code
+      const templates = {
+          // 🔥 Sabko CAPITAL mein kar diya hai (COMP_CODE, VENDOR, etc.)
           'PO': [
-            'comp_code (Company Code, e.g., RE01)', 
-            'purch_org (Purchasing Organization, e.g., RE01)', 
-            'pur_group (Purchasing Group, e.g., PGR)',
-            'vendor (Vendor Number)', 
-            'material (Material Number)', 
-            'quantity (Numeric amount)', 
-            'plant (Plant Code)'
+            'COMP_CODE (Company Code, e.g., RE01)', 
+            'PURCH_ORG (Purchasing Organization, e.g., RE01)', 
+            'PUR_GROUP (Purchasing Group, e.g., 001)',
+            'VENDOR (Vendor Number)', 
+            'MATERIAL (Material Number)', 
+            'QUANTITY (Numeric amount)', 
+            'PLANT (Plant Code)'
           ],
-          'SO': ['customer', 'material', 'quantity', 'salesOrg'],
-          'PR': ['material', 'quantity', 'plant']
+          'SO': ['CUSTOMER', 'MATERIAL', 'QUANTITY', 'SALES_ORG'],
+          'PR': ['MATERIAL', 'QUANTITY', 'PLANT']
         };
 
         const requiredFields = templates[docType] || [];
@@ -156,7 +156,7 @@ export class SAPMCPServer {
       'sap_create_document',
       {
         docType: z.string().describe('Document type like PO, SO, PR'),
-        jsonData: z.record(z.any()).describe('JSON object containing the exact details provided by the user'),
+        jsonData:  z.record(z.any()).describe('JSON object containing the details. CRITICAL: All JSON keys MUST be in UPPERCASE EXACTLY as template (e.g., "VENDOR", "MATERIAL", "COMP_CODE"). Do not use lowercase keys.'),
       },
       async ({ docType, jsonData }) => {
         try {
