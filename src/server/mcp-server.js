@@ -126,8 +126,9 @@ export class SAPMCPServer {
         docType: z.enum(['PO', 'SO', 'PR']).describe('The type of SAP document to create (e.g., PO for Purchase Order)'),
       },
       async ({ docType }) => {
-        const templates = {
-          'PO': ['vendor (Vendor Number, e.g., 1000)', 'material (Material Number, e.g., 40)', 'quantity (Numeric amount)', 'plant (Plant Code, e.g., 1000)'],
+       const templates = {
+        
+          'PO': ['vendor', 'material', 'quantity', 'plant', 'purch_org (Purchasing Organization, e.g., RE01)', 'pur_group (Purchasing Group, e.g., 001)'],
           'SO': ['customer', 'material', 'quantity', 'salesOrg'],
           'PR': ['material', 'quantity', 'plant']
         };
