@@ -97,14 +97,14 @@ export class SAPService {
       return { status: 'error', message: `SAP connection failed: ${error.message}` };
     }
   }
-
-  // 🔐 1. CSRF Token Fetcher (SAP Security Bypass)
+// 🔐 1. CSRF Token Fetcher (SAP Security Bypass)
   async getCsrfToken() {
     try {
       console.log('🔐 Fetching CSRF Token from SAP...');
-      // Ek choti si GET request maar ke token fetch kar rahe hain
-      const response = await axios.get(`/sap/opu/odata/sap/Z_GENERIC_SEARCH_SRV/TableDataSet?$top=1`, {
-        auth: this.auth,
+      
+      // FIX 1: Use this.axios.get instead of axios.get
+      // FIX 2: Removed auth object because this.axios already has it
+      const response = await this.axios.get(`/sap/opu/odata/sap/Z_GENERIC_SEARCH_SRV/TableDataSet?$top=1`, {
         headers: {
           'X-CSRF-Token': 'Fetch',
           'Accept': 'application/json'
@@ -129,7 +129,6 @@ export class SAPService {
 
       console.log(`🚀 Sending POST request to SAP for creating ${docType}...`);
       
-      // Payload structure (Waisa hi jaisa humne SEGW Entity mein banaya)
       const payload = {
         DocType: docType.toUpperCase(),
         JsonData: JSON.stringify(jsonData), 
@@ -137,8 +136,8 @@ export class SAPService {
         ReturnMessage: ""
       };
 
-      const response = await axios.post(`/sap/opu/odata/sap/Z_GENERIC_SEARCH_SRV/GenericCreateSet`, payload, {
-        auth: this.auth,
+      // FIX 3: Use this.axios.post instead of axios.post
+      const response = await this.axios.post(`/sap/opu/odata/sap/Z_GENERIC_SEARCH_SRV/GenericCreateSet`, payload, {
         headers: {
           'X-CSRF-Token': csrfToken,
           'Cookie': cookies ? cookies.join('; ') : '',
