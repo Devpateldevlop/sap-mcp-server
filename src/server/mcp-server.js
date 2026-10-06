@@ -127,8 +127,16 @@ export class SAPMCPServer {
       },
       async ({ docType }) => {
        const templates = {
-        
-          'PO': ['vendor', 'material', 'quantity', 'plant', 'purch_org (Purchasing Organization, e.g., RE01)', 'pur_group (Purchasing Group, e.g., 001)'],
+          // 🔥 Naya field add kiya: comp_code
+          'PO': [
+            'comp_code (Company Code, e.g., RE01)', 
+            'purch_org (Purchasing Organization, e.g., RE01)', 
+            'pur_group (Purchasing Group, e.g., PGR)',
+            'vendor (Vendor Number)', 
+            'material (Material Number)', 
+            'quantity (Numeric amount)', 
+            'plant (Plant Code)'
+          ],
           'SO': ['customer', 'material', 'quantity', 'salesOrg'],
           'PR': ['material', 'quantity', 'plant']
         };
